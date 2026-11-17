@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Video Editor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Scrollbar မပေါ်ဘဲ ပွတ်ဆွဲလို့ရအောင် ပြုလုပ်ခြင်း */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-[#121212] h-screen w-full flex justify-center text-white overflow-hidden select-none">
+
+    <!-- ဖုန်းထဲက ဗီဒီယို နှင့် အသံဖိုင် ရွေးရန် ဖျောက်ထားသော Inputs များ -->
+    <input type="file" id="videoInput" accept="video/*" class="hidden">
+    <input type="file" id="audioInput" accept="audio/*" class="hidden">
+
+    <!-- Mobile View Container -->
+    <div class="w-full max-w-md h-full flex flex-col relative bg-black shadow-xl sm:border sm:border-gray-800">
+        
+        <!-- Top Header -->
+        <header class="flex justify-between items-center px-4 py-3 bg-[#1c1c1c] z-10 shadow-md">
+            <button class="text-gray-400 hover:text-white"><i class="fa-solid fa-angle-left text-xl"></i></button>
+            <h1 class="text-sm font-semibold tracking-wider">VIDEO EDITOR</h1>
+            <button class="bg-green-500 text-white text-xs font-bold px-4 py-1.5 rounded-full hover:bg-green-600 transition">
+                SAVE
+            </button>
+        </header>
+
+        <!-- Video Preview Area -->
+        <main class="flex-1 relative flex items-center justify-center bg-[#0a0a0a]">
+            <!-- JavaScript ဖြင့် ဗီဒီယို ဖွင့်ပြရန် id="previewContainer" တပ်ထားပါသည် -->
+            <div id="previewContainer" class="w-full h-full flex items-center justify-center relative bg-gray-900">
+                <div class="text-center">
+                    <i class="fa-solid fa-film text-4xl text-gray-600 mb-2"></i>
+                    <p class="text-gray-500 text-sm">Tap "Add Video" below</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Tools / Icon Bar (Scrollable) -->
+        <nav class="bg-[#1c1c1c] w-full px-2 py-3 overflow-x-auto no-scrollbar flex items-center gap-6 border-b border-gray-800">
+            
+            <!-- Video ထည့်ရန် ခလုတ် (နှိပ်လျှင် videoInput ကို အလုပ်လုပ်စေမည်) -->
+            <div onclick="document.getElementById('videoInput').click()" class="flex flex-col items-center gap-1 min-w-[55px] cursor-pointer text-blue-400 hover:text-blue-300">
+                <i class="fa-solid fa-video text-lg"></i>
+                <span class="text-[10px] font-bold">Add Video</span>
+            </div>
+            
+            <!-- Audio/Music ထည့်ရန် ခလုတ် -->
+            <div onclick="document.getElementById('audioInput').click()" class="flex flex-col items-center gap-1 min-w-[50px] cursor-pointer text-gray-300 hover:text-white">
+                <i class="fa-solid fa-music text-lg"></i>
+                <span class="text-[10px]">Music</span>
+            </div>
+
+            <!-- အခြား Tools ခလုတ်များ -->
+            <div class="flex flex-col items-center gap-1 min-w-[50px] cursor-pointer text-gray-300 hover:text-white">
+                <i class="fa-solid fa-t text-lg"></i>
+                <span class="text-[10px]">Text</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 min-w-[50px] cursor-pointer text-gray-300 hover:text-white">
+                <i class="fa-solid fa-scissors text-lg"></i>
+                <span class="text-[10px]">Trim</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 min-w-[50px] cursor-pointer text-gray-300 hover:text-white">
+                <i class="fa-solid fa-arrows-split-up-and-left text-lg"></i>
+                <span class="text-[10px]">Split</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 min-w-[50px] cursor-pointer text-gray-300 hover:text-white">
+                <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+                <span class="text-[10px]">Filter</span>
+            </div>
+            <div class="flex flex-col items-center gap-1 min-w-[50px] cursor-pointer text-red-400 hover:text-red-300">
+                <i class="fa-regular fa-trash-can text-lg"></i>
+                <span class="text-[10px]">Delete</span>
+            </div>
+        </nav>
+
+        <!-- Timeline & Play Controls -->
+        <section class="bg-[#121212] h-40 w-full p-4 flex flex-col gap-3">
+            <!-- Time & Actions -->
+            <div class="flex justify-between items-center text-xs text-gray-400">
+                <span class="font-mono text-white">00:00.0 / 00:00.0</span>
+                <div class="flex gap-4">
+                    <i class="fa-solid fa-rotate-left cursor-pointer hover:text-white"></i>
+                    <i class="fa-solid fa-rotate-right cursor-pointer hover:text-white"></i>
+                </div>
+            </div>
+
+            <!-- Video Track Area -->
+            <div class="flex items-center w-full mt-2 relative">
+                <!-- Play Button -->
+                <button class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-black mr-3 shadow-lg shrink-0">
+                    <i class="fa-solid fa-play ml-1"></i>
+                </button>
+                
+                <!-- Track Timeline -->
+                <div class="flex-1 h-14 bg-gray-800 rounded-md border-2 border-[#1c1c1c] relative overflow-hidden flex items-center">
+                    <!-- Playhead (ဒေါင်လိုက်မျဉ်းနီ) -->
+                    <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-red-500 z-20 shadow-[0_0_5px_red]"></div>
+                    
+                    <!-- ဗီဒီယို timeline အတုံးလေး -->
+                    <div id="timelineTrack" class="w-full h-full bg-blue-900 border-r-2 border-black opacity-30">
+                        <p class="text-[8px] text-center text-white mt-4">Empty Track</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- ဗီဒီယို နှင့် အသံဖိုင် လုပ်ဆောင်မည့် JavaScript အပိုင်း -->
+    <script>
+        const videoInput = document.getElementById('videoInput');
+        const audioInput = document.getElementById('audioInput');
+        const previewContainer = document.getElementById('previewContainer');
+        const timelineTrack = document.getElementById('timelineTrack');
+
+        // ဗီဒီယို ရွေးချယ်လိုက်သောအခါ လုပ်ဆောင်မည့် အပိုင်း
+        videoInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            
+            if (file) {
+                // ဖိုင်ကို ယာယီ URL အဖြစ် ပြောင်းလဲခြင်း
+                const fileURL = URL.createObjectURL(file);
+                
+                // Preview Area ထဲတွင် Video Player ဖြင့် ပြသခြင်း
+                previewContainer.innerHTML = `
+                    <video src="${fileURL}" class="w-full h-full object-contain" controls autoplay></video>
+                `;
+
+                // အောက်က Timeline ကိုလည်း အရောင်ပြောင်းပေးခြင်း
+                timelineTrack.className = "w-full h-full bg-blue-600 border-r-2 border-black opacity-90";
+                timelineTrack.innerHTML = ""; // Empty စာသားကို ဖျက်မည်
+            }
+        });
+
+        // Music ခလုတ်နှိပ်၍ အသံဖိုင်ရွေးသောအခါ လုပ်ဆောင်မည့် အပိုင်း
+        audioInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            
+            if (file) {
+                // အသံဖိုင်ရွေးပြီးကြောင်း Notification ပြမည် (နောက်ပိုင်း Timeline မှာ အသံထပ်ထည့်ရန် Logic ဆက်ရေးနိုင်သည်)
+                alert("အသံဖိုင် ရွေးချယ်ပြီးပါပြီ - " + file.name);
+            }
+        });
+    </script>
+
+</body>
+</html>
